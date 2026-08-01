@@ -31,3 +31,24 @@ export interface FileProfile {
   duplicateRows: DuplicateRowGroup[];
   ambiguities: Ambiguity[];
 }
+
+export type AggregationType = "sum" | "avg" | "count" | "min" | "max";
+
+export interface PivotResult {
+  rowField: string;
+  /** Null when the pivot has a single dimension (no colField was given). */
+  colField: string | null;
+  measureField: string;
+  aggregation: AggregationType;
+  rowKeys: string[];
+  /** Empty when colField is absent. */
+  colKeys: string[];
+  /** cells[rowKey][colKey]; empty when colField is absent. */
+  cells: Record<string, Record<string, number>>;
+  /** Aggregated measure per row key, across all columns. */
+  rowTotals: Record<string, number>;
+  /** Aggregated measure per column key, across all rows. Empty when colField is absent. */
+  colTotals: Record<string, number>;
+  /** Aggregated measure across every row. */
+  grandTotal: number;
+}
