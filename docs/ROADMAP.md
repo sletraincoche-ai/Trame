@@ -29,7 +29,7 @@ Règle de séquencement : on ne commence pas un jalon avant que le précédent s
 - [x] `generate_formula(intent, columns)` — génère une formule Excel réelle + explication
 - [x] `quality_check(dataset, rules)` — les six contrôles déjà maquettés
 - [x] Jeu de tests de contrat (`packages/engine/src/contract-tests/`)
-- [ ] Constitution des dix premiers fichiers du golden set (`docs/ARCHITECTURE.md` section 10.1)
+- [x] Constitution des dix premiers fichiers du golden set (`docs/ARCHITECTURE.md` section 10.1)
 
 **Définition de fin** : les tests de contrat passent sur `RuleBasedEngine` ; le golden set existe et a un résultat attendu documenté pour chaque cas, avant même de commencer à écrire `ClaudeEngine`.
 
