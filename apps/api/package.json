@@ -5,13 +5,20 @@
   "type": "module",
   "main": "./src/index.ts",
   "scripts": {
-    "dev": "echo \"@trame/api: dev server not implemented yet (M0)\"",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc -b",
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@fastify/cors": "^11.3.0",
+    "@fastify/multipart": "^10.1.0",
     "@trame/core": "workspace:*",
     "@trame/engine": "workspace:*",
-    "@trame/ooxml": "workspace:*"
+    "@trame/ooxml": "workspace:*",
+    "exceljs": "^4.4.0",
+    "fastify": "^5.11.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.1"
   }
 }
