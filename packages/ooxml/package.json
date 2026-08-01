@@ -10,6 +10,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@trame/core": "workspace:*"
+    "@trame/core": "workspace:*",
+    "exceljs": "^4.4.0"
   }
 }
