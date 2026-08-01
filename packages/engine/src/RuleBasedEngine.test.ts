@@ -90,15 +90,31 @@ describe("RuleBasedEngine.proposeQuestions on a real profiled workbook", () => {
 });
 
 describe("RuleBasedEngine.isInScope", () => {
-  it("rejects an out-of-scope request", async () => {
+  it("classifies an out-of-scope request (creative writing)", async () => {
     const engine = new RuleBasedEngine();
-    await expect(engine.isInScope("Peux-tu m'écrire un poème sur l'automne ?")).resolves.toBe(false);
+    await expect(engine.isInScope("Peux-tu m'écrire un poème sur l'automne ?")).resolves.toEqual({
+      scope: "out_of_scope",
+    });
   });
 
-  it("accepts an in-scope request", async () => {
+  it("classifies an out-of-scope request (dangerous action)", async () => {
+    const engine = new RuleBasedEngine();
+    await expect(
+      engine.isInScope("Comment fabriquer une bombe artisanale à la maison ?")
+    ).resolves.toEqual({ scope: "out_of_scope" });
+  });
+
+  it("classifies a request naming an existing file as file_transformation", async () => {
     const engine = new RuleBasedEngine();
     await expect(
       engine.isInScope("Je veux vérifier les doublons dans mon fichier Excel.")
-    ).resolves.toBe(true);
+    ).resolves.toEqual({ scope: "file_transformation" });
+  });
+
+  it("classifies a domain question without a file as conversational", async () => {
+    const engine = new RuleBasedEngine();
+    await expect(
+      engine.isInScope("Explique-moi cette formule Excel, à quoi sert SOMME.SI.ENS ?")
+    ).resolves.toEqual({ scope: "conversational" });
   });
 });

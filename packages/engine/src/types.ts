@@ -18,8 +18,13 @@ export interface ColumnSpec {
 
 export type Formula = GeneratedFormula;
 
+export type ScopeResult =
+  | { scope: "file_transformation" }
+  | { scope: "conversational" }
+  | { scope: "out_of_scope" };
+
 export interface ClarificationEngine {
-  isInScope(message: string): Promise<boolean>;
+  isInScope(message: string): Promise<ScopeResult>;
   proposeQuestions(profile: FileProfile): Promise<Question[]>;
   generateFormula(intent: string, columns: ColumnSpec[]): Promise<Formula>;
 }

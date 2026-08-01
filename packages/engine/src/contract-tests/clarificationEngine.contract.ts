@@ -48,16 +48,25 @@ function profileWithDuplicates(): FileProfile {
 export function defineClarificationEngineContractTests(createEngine: () => ClarificationEngine): void {
   describe("ClarificationEngine contract", () => {
     describe("isInScope", () => {
-      it("accepts a clearly in-scope spreadsheet request", async () => {
+      it("classifies a request naming an actual file as file_transformation", async () => {
         const engine = createEngine();
         await expect(
           engine.isInScope("Peux-tu calculer le total par catégorie dans ce fichier Excel ?")
-        ).resolves.toBe(true);
+        ).resolves.toEqual({ scope: "file_transformation" });
       });
 
-      it("rejects a clearly out-of-scope request", async () => {
+      it("classifies a genuine domain question without a file as conversational", async () => {
         const engine = createEngine();
-        await expect(engine.isInScope("Quel temps fait-il à Paris demain ?")).resolves.toBe(false);
+        await expect(engine.isInScope("Explique-moi cette formule Excel")).resolves.toEqual({
+          scope: "conversational",
+        });
+      });
+
+      it("classifies a clearly out-of-scope request as out_of_scope", async () => {
+        const engine = createEngine();
+        await expect(engine.isInScope("Quel temps fait-il à Paris demain ?")).resolves.toEqual({
+          scope: "out_of_scope",
+        });
       });
     });
 

@@ -24,8 +24,8 @@ function checkRowsAnalyzed<T>(rows: T[]): QualityCheckResult {
     value: total,
     message:
       total > 0
-        ? `${total} ligne(s) ont été analysées, aucune n'a été ignorée en silence.`
-        : "Aucune ligne à analyser : le jeu de données est vide.",
+        ? `J'ai analysé ${total} ligne(s), aucune n'a été ignorée en silence.`
+        : "Je n'ai aucune ligne à analyser : le jeu de données est vide.",
   };
 }
 
@@ -53,8 +53,8 @@ function checkEmptyCells<T extends Record<string, unknown>>(
     value: emptyCount,
     message:
       emptyCount === 0
-        ? "Aucune cellule vide détectée sur les colonnes vérifiées."
-        : `${emptyCount} cellule(s) vide(s) détectée(s), dans : ${[...columnsWithEmpty].join(", ")}.`,
+        ? "Je n'ai détecté aucune cellule vide sur les colonnes vérifiées."
+        : `J'ai détecté ${emptyCount} cellule(s) vide(s), dans : ${[...columnsWithEmpty].join(", ")}.`,
   };
 }
 
@@ -76,9 +76,9 @@ function checkTotalsConsistency<T extends Record<string, unknown>>(
     value: maxDelta,
     message:
       maxDelta <= TOTALS_EPSILON
-        ? `La somme des sous-totaux correspond bien au total général (${pivot.grandTotal}).`
-        : `Écart de ${maxDelta} entre la somme des sous-totaux et le total général (${pivot.grandTotal}) : ` +
-          `l'agrégation "${aggregation}" choisie ne permet pas de recomposer le total à partir des sous-totaux.`,
+        ? `J'ai vérifié : la somme des sous-totaux correspond bien au total général (${pivot.grandTotal}).`
+        : `J'ai trouvé un écart de ${maxDelta} entre la somme des sous-totaux et le total général ` +
+          `(${pivot.grandTotal}) : l'agrégation "${aggregation}" ne permet pas de recomposer le total à partir des sous-totaux.`,
   };
 }
 
@@ -105,8 +105,9 @@ function checkDuplicateRows<T extends Record<string, unknown>>(
     value: duplicateRowCount,
     message:
       duplicateRowCount === 0
-        ? `Aucun doublon sur la combinaison ${keyColumns.join(" + ")}.`
-        : `${duplicateRowCount} ligne(s) partagent la même combinaison ${keyColumns.join(" + ")} qu'une autre ligne.`,
+        ? `Je n'ai trouvé aucun doublon sur la combinaison ${keyColumns.join(" + ")}.`
+        : `J'ai trouvé ${duplicateRowCount} ligne(s) qui partagent la même combinaison ` +
+          `${keyColumns.join(" + ")} qu'une autre ligne.`,
   };
 }
 
@@ -126,8 +127,8 @@ function checkThresholdBreach<T extends Record<string, unknown>>(
     value: breaches,
     message:
       breaches === 0
-        ? `Aucune ligne ne dépasse le seuil de ${Math.round(rule.max * 100)}% sur "${rule.field}".`
-        : `${breaches} ligne(s) dépassent le seuil de ${Math.round(rule.max * 100)}% sur "${rule.field}".`,
+        ? `Je n'ai trouvé aucune ligne dépassant le seuil de ${Math.round(rule.max * 100)}% sur "${rule.field}".`
+        : `J'ai trouvé ${breaches} ligne(s) qui dépassent le seuil de ${Math.round(rule.max * 100)}% sur "${rule.field}".`,
   };
 }
 
@@ -146,7 +147,7 @@ function checkRoundedAmounts<T extends Record<string, unknown>>(
       label: "Montants arrondis",
       status: "ok",
       value: 0,
-      message: "Contrôle désactivé.",
+      message: "Je n'ai pas exécuté ce contrôle : il est désactivé.",
     };
   }
 
@@ -163,8 +164,9 @@ function checkRoundedAmounts<T extends Record<string, unknown>>(
     value: hiddenDecimalsCount,
     message:
       hiddenDecimalsCount === 0
-        ? `Aucune décimale cachée sur "${rule.field}" au-delà de ${decimals} décimale(s).`
-        : `${hiddenDecimalsCount} valeur(s) de "${rule.field}" ont des décimales cachées au-delà de ${decimals} décimale(s).`,
+        ? `Je n'ai trouvé aucune décimale cachée sur "${rule.field}" au-delà de ${decimals} décimale(s).`
+        : `J'ai trouvé ${hiddenDecimalsCount} valeur(s) de "${rule.field}" avec des décimales cachées ` +
+          `au-delà de ${decimals} décimale(s).`,
   };
 }
 
