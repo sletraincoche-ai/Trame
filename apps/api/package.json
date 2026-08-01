@@ -1,0 +1,17 @@
+{
+  "name": "@trame/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "echo \"@trame/api: dev server not implemented yet (M0)\"",
+    "build": "tsc -b",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@trame/core": "workspace:*",
+    "@trame/engine": "workspace:*",
+    "@trame/ooxml": "workspace:*"
+  }
+}
