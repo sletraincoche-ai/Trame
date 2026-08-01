@@ -52,3 +52,32 @@ export interface PivotResult {
   /** Aggregated measure across every row. */
   grandTotal: number;
 }
+
+export type FormulaIntent = "total_par_categorie" | "ecart" | "ecart_pourcentage" | "alerte_seuil";
+
+export interface FormulaColumnRef {
+  name: string;
+  /** 0-based column position, consistent with ColumnProfile.position. */
+  position: number;
+}
+
+export interface FormulaColumns {
+  /** Column to group by (total_par_categorie). */
+  category?: FormulaColumnRef;
+  /** Column holding the actual/observed value (used by every intent). */
+  value?: FormulaColumnRef;
+  /** Column holding the reference/budget value to compare against (ecart, ecart_pourcentage, alerte_seuil). */
+  reference?: FormulaColumnRef;
+  /** 1-based spreadsheet row the formula is generated for. Defaults to 2 (first data row). */
+  row?: number;
+  /** Last data row of the table, used by total_par_categorie for the aggregation range. Defaults to `row`. */
+  lastDataRow?: number;
+  /** Alert threshold as a ratio (e.g. 0.1 = 10%), used by alerte_seuil. Defaults to 0.1. */
+  threshold?: number;
+}
+
+export interface GeneratedFormula {
+  intent: FormulaIntent;
+  formula: string;
+  explanation: string;
+}

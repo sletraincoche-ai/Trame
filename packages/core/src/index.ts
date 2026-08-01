@@ -1,3 +1,4 @@
 export * from "./types";
 export { profileWorkbook } from "./profileWorkbook";
 export { computePivot } from "./computePivot";
+export { generateFormula } from "./generateFormula";
