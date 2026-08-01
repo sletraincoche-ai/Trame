@@ -81,3 +81,56 @@ export interface GeneratedFormula {
   formula: string;
   explanation: string;
 }
+
+export type QualityCheckStatus = "ok" | "attention";
+
+export type QualityCheckId =
+  | "rows_analyzed"
+  | "empty_cells"
+  | "totals_consistency"
+  | "duplicate_rows"
+  | "threshold_breach"
+  | "rounded_amounts";
+
+export interface QualityCheckResult {
+  check: QualityCheckId;
+  /** French label matching the mock's "Statut" column, e.g. "Lignes analysées". */
+  label: string;
+  status: QualityCheckStatus;
+  value: number;
+  /** Plain-language explanation, matching the mock's "Ce que ça veut dire" column. */
+  message: string;
+}
+
+export interface TotalsConsistencyRule {
+  rowField: string;
+  /** Omit for a single-dimension check (no column breakdown). */
+  colField?: string | null;
+  measureField: string;
+  /** Defaults to "sum", the only aggregation for which sub-totals are expected to add up to the grand total. */
+  aggregation?: AggregationType;
+}
+
+export interface ThresholdRule {
+  /** Field holding the variance to check, e.g. a percentage-gap column. */
+  field: string;
+  /** Rows whose |value| exceeds this are flagged, e.g. 0.1 for a 10% threshold. */
+  max: number;
+}
+
+export interface RoundedAmountsRule {
+  enabled: boolean;
+  field: string;
+  /** Expected number of decimal places; defaults to 0 (whole amounts). */
+  decimals?: number;
+}
+
+export interface QualityCheckRules {
+  /** Columns checked for missing/empty values. Defaults to every key found on the first row. */
+  emptyCellColumns?: string[];
+  /** Columns whose combined values identify a row; rows sharing the same combination are duplicates. */
+  duplicateKeyColumns: string[];
+  totalsConsistency: TotalsConsistencyRule;
+  threshold: ThresholdRule;
+  roundedAmounts: RoundedAmountsRule;
+}
