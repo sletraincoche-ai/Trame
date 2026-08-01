@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trame — parcours M0</title>
+  </head>
+  <body>
+    <h1>Trame — parcours de test (M0)</h1>
+    <p>Interface minimale, sans design : sert à vérifier que le parcours dépôt → profil → questions → classeur fonctionne réellement.</p>
+
+    <section id="upload-section">
+      <h2>1. Déposer un fichier</h2>
+      <input type="file" id="file-input" accept=".xlsx" />
+      <button id="upload-button">Analyser</button>
+      <p id="upload-status"></p>
+    </section>
+
+    <section id="profile-section" hidden>
+      <h2>2. Profil du fichier</h2>
+      <table id="profile-table" border="1" cellpadding="4">
+        <thead>
+          <tr>
+            <th>Colonne</th>
+            <th>Type</th>
+            <th>Manquants</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="ambiguities"></p>
+      <p id="duplicates"></p>
+    </section>
+
+    <section id="questions-section" hidden>
+      <h2>3. Questions de clarification</h2>
+      <div id="questions-list"></div>
+      <p id="no-questions" hidden>Aucune question — le fichier est propre.</p>
+    </section>
+
+    <section id="workbook-section" hidden>
+      <h2>4. Générer le classeur</h2>
+      <p>
+        <label>Dimension (regroupement) : <select id="row-field-select"></select></label>
+      </p>
+      <p>
+        <label>Répartition (optionnel) : <select id="col-field-select"><option value="">Aucune</option></select></label>
+      </p>
+      <p>
+        <label>Mesure : <select id="measure-field-select"></select></label>
+      </p>
+      <p>
+        <label>
+          Agrégation :
+          <select id="aggregation-select">
+            <option value="sum">Somme</option>
+            <option value="avg">Moyenne</option>
+            <option value="count">Nombre</option>
+            <option value="min">Minimum</option>
+            <option value="max">Maximum</option>
+          </select>
+        </label>
+      </p>
+      <button id="generate-button">Générer et télécharger le classeur</button>
+      <p id="workbook-status"></p>
+    </section>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
