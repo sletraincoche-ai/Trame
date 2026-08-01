@@ -1,5 +1,28 @@
 import type { AggregationType, PivotResult } from "./types";
 
+// Guards against a caller picking a near-unique column (e.g. a raw date or
+// amount) as rowField/colField: cells is built as an O(rowKeys x colKeys)
+// grid, so an uncapped high-cardinality dimension can reach millions of
+// entries and exhaust memory well before any of the six-package pipeline's
+// other invariants even get checked. 500 keeps the worst case (500 x 500 =
+// 250 000 cells) comfortably bounded while still allowing rich, real
+// categorical breakdowns.
+const MAX_DISTINCT_KEYS = 500;
+
+export class PivotCardinalityLimitError extends Error {
+  constructor(
+    public readonly fieldName: string,
+    public readonly distinctCount: number,
+    public readonly limit: number = MAX_DISTINCT_KEYS
+  ) {
+    super(
+      `computePivot: "${fieldName}" a ${distinctCount} valeurs distinctes, au-delà de la limite de ${limit}. ` +
+        "Choisissez une colonne à cardinalité plus faible (une catégorie, pas une valeur quasi unique par ligne)."
+    );
+    this.name = "PivotCardinalityLimitError";
+  }
+}
+
 function pushToBucket(map: Map<string, unknown[]>, key: string, value: unknown): void {
   const bucket = map.get(key);
   if (bucket) {
@@ -73,6 +96,13 @@ export function computePivot<T extends Record<string, unknown>>(
       pushToBucket(colBuckets, colKey, row[measureField]);
       pushToBucket(cellBuckets, cellKeyOf(rowKey, colKey), row[measureField]);
     }
+  }
+
+  if (rowKeys.length > MAX_DISTINCT_KEYS) {
+    throw new PivotCardinalityLimitError(String(rowField), rowKeys.length);
+  }
+  if (hasColField && colKeys.length > MAX_DISTINCT_KEYS) {
+    throw new PivotCardinalityLimitError(String(colField), colKeys.length);
   }
 
   const rowTotals: Record<string, number> = {};

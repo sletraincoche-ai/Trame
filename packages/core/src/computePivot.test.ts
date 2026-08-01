@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computePivot } from "./computePivot";
+import { computePivot, PivotCardinalityLimitError } from "./computePivot";
 
 type SaleRecord = {
   region: "North" | "South" | "East";
@@ -95,5 +95,50 @@ describe("computePivot", () => {
     expect(result.rowTotals).toEqual({ North: 450, South: 400, East: 200 });
     expect(result.grandTotal).toBe(1050);
     expect(Object.values(result.rowTotals).reduce((a, b) => a + b, 0)).toBe(result.grandTotal);
+  });
+});
+
+describe("computePivot cardinality guard", () => {
+  // Simulates picking a near-unique column (e.g. a raw date or amount) as
+  // rowField/colField — exactly what caused the fuzz suite to OOM before
+  // this guard existed, by building an O(rowKeys x colKeys) grid unbounded.
+  function rowsWithDistinctValues(count: number): { key: string; category: string; amount: number }[] {
+    return Array.from({ length: count }, (_, i) => ({
+      key: `k${i}`,
+      category: i % 2 === 0 ? "A" : "B",
+      amount: i,
+    }));
+  }
+
+  it("throws a clear, typed error when rowField has too many distinct values", () => {
+    const rows = rowsWithDistinctValues(501);
+
+    expect(() => computePivot(rows, "key", null, "amount", "sum")).toThrow(PivotCardinalityLimitError);
+    try {
+      computePivot(rows, "key", null, "amount", "sum");
+      throw new Error("expected computePivot to throw");
+    } catch (error) {
+      expect(error).toBeInstanceOf(PivotCardinalityLimitError);
+      const cardinalityError = error as PivotCardinalityLimitError;
+      expect(cardinalityError.fieldName).toBe("key");
+      expect(cardinalityError.distinctCount).toBe(501);
+      expect(cardinalityError.limit).toBe(500);
+      expect(cardinalityError.message).toContain("key");
+      expect(cardinalityError.message).toContain("501");
+    }
+  });
+
+  it("throws when colField (not rowField) is the high-cardinality one", () => {
+    const rows = rowsWithDistinctValues(501);
+
+    expect(() => computePivot(rows, "category", "key", "amount", "sum")).toThrow(
+      PivotCardinalityLimitError
+    );
+  });
+
+  it("does not throw at exactly the limit", () => {
+    const rows = rowsWithDistinctValues(500);
+
+    expect(() => computePivot(rows, "key", null, "amount", "sum")).not.toThrow();
   });
 });
