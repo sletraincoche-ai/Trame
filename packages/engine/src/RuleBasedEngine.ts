@@ -83,6 +83,12 @@ const EXPLANATORY_PATTERNS: RegExp[] = [
   /quelle est la diff[ée]rence entre/i,
 ];
 
+// The fixed refusal response (ARCHITECTURE.md §3): shown whenever isInScope
+// resolves to "out_of_scope", first person and direct, no attempt to be
+// helpful outside the product's actual scope.
+const REFUSAL_MESSAGE =
+  "Je ne suis pas conçu pour ça — je transforme des fichiers. Déposez-en un pour que je puisse vous aider.";
+
 function isInScopeRule(message: string): ScopeResult {
   if (OUT_OF_SCOPE_PATTERNS.some((pattern) => pattern.test(message))) {
     return { scope: "out_of_scope" };
@@ -106,6 +112,11 @@ function isInScopeRule(message: string): ScopeResult {
 export class RuleBasedEngine implements ClarificationEngine {
   async isInScope(message: string): Promise<ScopeResult> {
     return isInScopeRule(message);
+  }
+
+  /** Fixed refusal response to show when isInScope resolves to "out_of_scope". */
+  refusalMessage(): string {
+    return REFUSAL_MESSAGE;
   }
 
   async proposeQuestions(profile: FileProfile): Promise<Question[]> {

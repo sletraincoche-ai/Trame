@@ -40,9 +40,9 @@ Règle de séquencement : on ne commence pas un jalon avant que le précédent s
 **Objectif** : le comportement de refus existe et est testable, avant de dépendre d'un modèle pour le décider.
 
 - [x] `isInScope(message)` version règle simple
-- [ ] Réponse fixe de refus, cohérente avec le ton produit
-- [ ] Jeu de refus (`docs/ARCHITECTURE.md` section 10.2)
-- [ ] Séparation instruction/donnée : test dédié
+- [x] Réponse fixe de refus, cohérente avec le ton produit
+- [x] Jeu de refus (`docs/ARCHITECTURE.md` section 10.2)
+- [x] Séparation instruction/donnée : test dédié
 
 **Définition de fin** : le jeu de refus passe à 100 % avec la version « règle simple ».
 

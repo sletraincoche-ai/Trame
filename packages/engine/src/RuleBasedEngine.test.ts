@@ -118,3 +118,16 @@ describe("RuleBasedEngine.isInScope", () => {
     ).resolves.toEqual({ scope: "conversational" });
   });
 });
+
+describe("RuleBasedEngine.refusalMessage", () => {
+  it("is a fixed, first-person, direct refusal", () => {
+    const engine = new RuleBasedEngine();
+    const message = engine.refusalMessage();
+
+    expect(message).toBe(
+      "Je ne suis pas conçu pour ça — je transforme des fichiers. Déposez-en un pour que je puisse vous aider."
+    );
+    // Same message every time: it's a fixed response, not generated per call.
+    expect(engine.refusalMessage()).toBe(message);
+  });
+});
