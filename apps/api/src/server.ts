@@ -48,7 +48,13 @@ function createEngine(): ClarificationEngine {
 export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
 
-  await app.register(cors, { origin: true });
+  // Local-dev CORS: allow any origin, including static pages opened directly
+  // via file:// (whose Origin header is the literal string "null" — origin:
+  // true would reflect that back, which some browsers handle inconsistently;
+  // a literal "*" avoids the ambiguity entirely). @fastify/cors also
+  // registers its own wildcard OPTIONS route automatically, so every route
+  // below — JSON or multipart — gets preflight handling for free.
+  await app.register(cors, { origin: "*" });
   await app.register(multipart);
 
   app.post("/upload", async (request, reply) => {

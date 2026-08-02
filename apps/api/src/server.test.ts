@@ -196,3 +196,41 @@ describe("GET /engine", () => {
     }
   });
 });
+
+describe("CORS: any origin (including file:// pages) can call every route", () => {
+  let app: Awaited<ReturnType<typeof buildServer>>;
+
+  beforeAll(async () => {
+    app = await buildServer();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it("sends a literal wildcard, not a reflected origin, on a real response", async () => {
+    const response = await app.inject({ method: "GET", url: "/engine" });
+    expect(response.headers["access-control-allow-origin"]).toBe("*");
+  });
+
+  it("still sends the wildcard for a file:// page (Origin: null)", async () => {
+    const response = await app.inject({ method: "GET", url: "/engine", headers: { origin: "null" } });
+    expect(response.headers["access-control-allow-origin"]).toBe("*");
+  });
+
+  it.each(["/upload", "/questions", "/workbook"])("answers a CORS preflight for %s", async (url) => {
+    const response = await app.inject({
+      method: "OPTIONS",
+      url,
+      headers: {
+        origin: "http://example.test",
+        "access-control-request-method": "POST",
+        "access-control-request-headers": "content-type",
+      },
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers["access-control-allow-origin"]).toBe("*");
+    expect(response.headers["access-control-allow-methods"]).toContain("POST");
+  });
+});
