@@ -11,11 +11,11 @@ Règle de séquencement : on ne commence pas un jalon avant que le précédent s
 **Objectif** : un utilisateur dépose un vrai fichier Excel, obtient un vrai profil de colonnes, une question de clarification (encore décidée par des règles simples), et télécharge un vrai classeur recomposé.
 
 - [x] Monorepo pnpm : `apps/web`, `apps/api`, `packages/core`, `packages/engine`, `packages/ooxml`
-- [ ] `packages/ooxml` : migration du générateur de classeur déjà validé dans les maquettes (styles, gel, filtres) — garder tel quel, c'est une brique qui fonctionne
+- [x] `packages/ooxml` : `buildPivotWorkbook` — générateur minimal mais réel (styles, gel, filtres) ; pas repris des maquettes (hors repo, inaccessibles), reconstruit et testé
 - [x] `packages/core` : lecture réelle d'un `.xlsx` via `exceljs` → profil structuré (colonnes, types détectés, taux de valeurs manquantes, doublons potentiels)
 - [x] `packages/engine` : interface `ClarificationEngine` + `RuleBasedEngine`
-- [ ] `apps/web` : parcours complet (dépôt → profil → question → classeur) branché sur les vraies fonctions ci-dessus
-- [ ] Coffre-fort : chiffrement client repris tel quel depuis la maquette de sécurité
+- [x] `apps/web` : parcours complet (dépôt → profil → question → classeur) branché sur les vraies fonctions ci-dessus
+- [ ] Coffre-fort : chiffrement client repris tel quel depuis la maquette de sécurité — non commencé
 
 **Définition de fin** : déposer trois fichiers Excel réels et différents produit trois profils différents et corrects (vérifiable manuellement), sans aucune donnée de démonstration codée en dur dans le chemin d'exécution.
 
@@ -52,13 +52,13 @@ Règle de séquencement : on ne commence pas un jalon avant que le précédent s
 
 **Objectif** : remplacer `RuleBasedEngine` par `ClaudeEngine` sur les décisions de jugement, sans toucher au reste du système.
 
-- [ ] `ClaudeEngine` implémente la même interface `ClarificationEngine`, avec les six outils définis dans `docs/ARCHITECTURE.md` §5.2
-- [ ] System prompt écrit à partir de `docs/ARCHITECTURE.md` §5.3
-- [ ] Sortie structurée (schéma JSON) pour le plan de classeur et les questions de clarification
-- [ ] Classification d'intention en deux passes
-- [ ] `ClaudeEngine` passe le jeu de contrat de M1 et le jeu de refus de M2
-- [ ] Vérification contractuelle de la configuration zero data retention côté API
-- [ ] Bascule contrôlée par un indicateur de configuration (`ENGINE=rule|claude`)
+- [x] `ClaudeEngine` implémente la même interface `ClarificationEngine`, avec les six outils définis dans `docs/ARCHITECTURE.md` §5.2
+- [x] System prompt écrit à partir de `docs/ARCHITECTURE.md` §5.3
+- [ ] Sortie structurée (schéma JSON) pour le plan de classeur et les questions de clarification — questions couvertes (`propose_questions`, tool_choice forcé) ; le schéma du plan de classeur (`assemble_workbook`) existe et est testé unitairement mais n'est pas encore exercé en conditions réelles
+- [x] Classification d'intention en deux passes
+- [x] `ClaudeEngine` passe le jeu de contrat de M1 et le jeu de refus de M2 — 9/9 contrat, 12/12 jeu de refus, mesuré contre l'API réelle
+- [ ] Vérification contractuelle de la configuration zero data retention côté API — volontairement non automatisée (accord contractuel séparé, pas un paramètre d'appel) ; à vérifier à la main avant toute mise en production
+- [x] Bascule contrôlée par un indicateur de configuration (`ENGINE=rule|claude`)
 
 **Définition de fin** : `ClaudeEngine` activé par défaut seulement après avoir égalé ou dépassé `RuleBasedEngine` sur les deux jeux de tests, mesuré et documenté.
 
