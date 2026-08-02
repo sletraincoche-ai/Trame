@@ -1,5 +1,14 @@
 import { buildServer } from "./server";
 
+// Loads ANTHROPIC_API_KEY (needed only when ENGINE=claude) and any other
+// local config from .env. Silently a no-op if .env doesn't exist — real
+// deployments inject env vars directly instead.
+try {
+  process.loadEnvFile();
+} catch {
+  // no .env file — fine, ENGINE defaults to "rule" which needs no key.
+}
+
 const PORT = Number(process.env.PORT ?? 3001);
 
 async function main(): Promise<void> {

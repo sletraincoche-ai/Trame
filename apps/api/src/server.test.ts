@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { buildServer } from "./server";
 
 async function buildTestWorkbookBuffer(): Promise<Buffer> {
@@ -101,5 +101,40 @@ describe("apps/api integration: upload -> questions -> workbook", () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({ error: expect.stringContaining("501") });
+  });
+});
+
+describe("apps/api ENGINE switch (ENGINE=rule|claude, default rule)", () => {
+  const originalEngine = process.env.ENGINE;
+  const originalApiKey = process.env.ANTHROPIC_API_KEY;
+
+  afterEach(() => {
+    if (originalEngine === undefined) delete process.env.ENGINE;
+    else process.env.ENGINE = originalEngine;
+    if (originalApiKey === undefined) delete process.env.ANTHROPIC_API_KEY;
+    else process.env.ANTHROPIC_API_KEY = originalApiKey;
+  });
+
+  it("defaults to RuleBasedEngine when ENGINE is unset", async () => {
+    delete process.env.ENGINE;
+    const app = await buildServer();
+    await app.close();
+  });
+
+  it("accepts ENGINE=rule explicitly", async () => {
+    process.env.ENGINE = "rule";
+    const app = await buildServer();
+    await app.close();
+  });
+
+  it("rejects an unknown ENGINE value", async () => {
+    process.env.ENGINE = "not-a-real-engine";
+    await expect(buildServer()).rejects.toThrow(/Unknown ENGINE/);
+  });
+
+  it("requires an API key when ENGINE=claude is requested", async () => {
+    process.env.ENGINE = "claude";
+    delete process.env.ANTHROPIC_API_KEY;
+    await expect(buildServer()).rejects.toThrow(/API key/);
   });
 });

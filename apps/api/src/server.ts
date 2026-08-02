@@ -5,7 +5,8 @@ import cors from "@fastify/cors";
 import multipart from "@fastify/multipart";
 import type { AggregationType, FileProfile } from "@trame/core";
 import { computePivot, PivotCardinalityLimitError, profileWorkbook } from "@trame/core";
-import { RuleBasedEngine } from "@trame/engine";
+import { ClaudeEngine, RuleBasedEngine } from "@trame/engine";
+import type { ClarificationEngine } from "@trame/engine";
 import { buildPivotWorkbook } from "@trame/ooxml";
 import Fastify, { type FastifyInstance } from "fastify";
 import { extractRows } from "./extractRows";
@@ -28,13 +29,29 @@ interface WorkbookRequestBody {
   aggregation?: string;
 }
 
+/**
+ * ENGINE=rule|claude (default: rule) — ClaudeEngine is never active unless
+ * explicitly requested. This is the only place apps/api decides which
+ * ClarificationEngine implementation to use.
+ */
+function createEngine(): ClarificationEngine {
+  const engineChoice = process.env.ENGINE ?? "rule";
+  if (engineChoice === "claude") {
+    return new ClaudeEngine();
+  }
+  if (engineChoice !== "rule") {
+    throw new Error(`Unknown ENGINE "${engineChoice}": expected "rule" or "claude".`);
+  }
+  return new RuleBasedEngine();
+}
+
 export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
 
   await app.register(cors, { origin: true });
   await app.register(multipart);
 
-  const engine = new RuleBasedEngine();
+  const engine = createEngine();
 
   app.post("/upload", async (request, reply) => {
     const file = await request.file();
