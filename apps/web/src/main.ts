@@ -14,6 +14,8 @@ function byId<T extends HTMLElement>(id: string): T {
   return element as T;
 }
 
+const engineIndicator = byId<HTMLElement>("engine-indicator");
+
 const fileInput = byId<HTMLInputElement>("file-input");
 const uploadButton = byId<HTMLButtonElement>("upload-button");
 const uploadStatus = byId<HTMLParagraphElement>("upload-status");
@@ -41,6 +43,18 @@ uploadButton.addEventListener("click", () => {
 generateButton.addEventListener("click", () => {
   void handleGenerateWorkbook();
 });
+void loadEngineIndicator();
+
+/** Shows which ClarificationEngine apps/api is actually using — no ambiguity about what's being tested. */
+async function loadEngineIndicator(): Promise<void> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/engine`);
+    const body = (await response.json()) as { engine: "rule" | "claude" };
+    engineIndicator.textContent = body.engine === "claude" ? "Moteur : Claude" : "Moteur : règles";
+  } catch {
+    engineIndicator.textContent = "Moteur : inconnu (apps/api est-il lancé ?)";
+  }
+}
 
 async function handleUpload(): Promise<void> {
   const file = fileInput.files?.[0];

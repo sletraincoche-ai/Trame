@@ -51,8 +51,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(cors, { origin: true });
   await app.register(multipart);
 
-  const engine = createEngine();
-
   app.post("/upload", async (request, reply) => {
     const file = await request.file();
     if (!file) {
@@ -74,14 +72,37 @@ export async function buildServer(): Promise<FastifyInstance> {
     }
   });
 
+  app.get("/engine", async (_request, reply) => {
+    return reply.send({ engine: process.env.ENGINE === "claude" ? "claude" : "rule" });
+  });
+
   app.post<{ Body: QuestionsRequestBody }>("/questions", async (request, reply) => {
     const { profile } = request.body;
     if (!profile) {
       return reply.status(400).send({ error: "Le champ 'profile' est requis." });
     }
 
-    const questions = await engine.proposeQuestions(profile);
-    return reply.send({ questions });
+    // Built per request, not once at server startup: a missing/invalid key
+    // must never prevent the server itself from starting (ENGINE=claude can
+    // be requested without a key configured yet) — only requests that
+    // actually need the engine fail, cleanly, with the real error message.
+    let engine: ClarificationEngine;
+    try {
+      engine = createEngine();
+    } catch (error) {
+      return reply
+        .status(500)
+        .send({ error: error instanceof Error ? error.message : "Erreur de configuration du moteur." });
+    }
+
+    try {
+      const questions = await engine.proposeQuestions(profile);
+      return reply.send({ questions });
+    } catch (error) {
+      return reply
+        .status(502)
+        .send({ error: error instanceof Error ? error.message : "Le moteur de clarification a échoué." });
+    }
   });
 
   app.post<{ Body: WorkbookRequestBody }>("/workbook", async (request, reply) => {

@@ -127,14 +127,72 @@ describe("apps/api ENGINE switch (ENGINE=rule|claude, default rule)", () => {
     await app.close();
   });
 
-  it("rejects an unknown ENGINE value", async () => {
+  // A missing/invalid key must never take down the whole server — only a
+  // request that actually needs the engine should fail, cleanly. So these
+  // two now check that buildServer() itself always succeeds, and that the
+  // failure surfaces as a clean 500 from /questions instead.
+  const minimalProfile = {
+    filePath: "test.xlsx",
+    sheetName: "Sheet1",
+    rowCount: 1,
+    columns: [{ name: "Poste", position: 0, type: "text", missingCount: 0, missingRate: 0 }],
+    duplicateRows: [],
+    ambiguities: [],
+  };
+
+  it("starts fine even with an unknown ENGINE value, and fails cleanly only when /questions is called", async () => {
     process.env.ENGINE = "not-a-real-engine";
-    await expect(buildServer()).rejects.toThrow(/Unknown ENGINE/);
+    const app = await buildServer();
+    try {
+      const response = await app.inject({ method: "POST", url: "/questions", payload: { profile: minimalProfile } });
+      expect(response.statusCode).toBe(500);
+      expect(response.json()).toMatchObject({ error: expect.stringContaining("Unknown ENGINE") });
+    } finally {
+      await app.close();
+    }
   });
 
-  it("requires an API key when ENGINE=claude is requested", async () => {
+  it("starts fine with ENGINE=claude and no API key, and fails cleanly only when /questions is called", async () => {
     process.env.ENGINE = "claude";
     delete process.env.ANTHROPIC_API_KEY;
-    await expect(buildServer()).rejects.toThrow(/API key/);
+    const app = await buildServer();
+    try {
+      const response = await app.inject({ method: "POST", url: "/questions", payload: { profile: minimalProfile } });
+      expect(response.statusCode).toBe(500);
+      expect(response.json()).toMatchObject({ error: expect.stringContaining("API key") });
+    } finally {
+      await app.close();
+    }
+  });
+});
+
+describe("GET /engine", () => {
+  const originalEngine = process.env.ENGINE;
+
+  afterEach(() => {
+    if (originalEngine === undefined) delete process.env.ENGINE;
+    else process.env.ENGINE = originalEngine;
+  });
+
+  it("reports \"rule\" by default", async () => {
+    delete process.env.ENGINE;
+    const app = await buildServer();
+    try {
+      const response = await app.inject({ method: "GET", url: "/engine" });
+      expect(response.json()).toEqual({ engine: "rule" });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it("reports \"claude\" when ENGINE=claude", async () => {
+    process.env.ENGINE = "claude";
+    const app = await buildServer();
+    try {
+      const response = await app.inject({ method: "GET", url: "/engine" });
+      expect(response.json()).toEqual({ engine: "claude" });
+    } finally {
+      await app.close();
+    }
   });
 });
