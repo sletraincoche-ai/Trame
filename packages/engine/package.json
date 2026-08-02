@@ -10,7 +10,9 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@trame/core": "workspace:*",
+    "@trame/ooxml": "workspace:*",
     "exceljs": "^4.4.0"
   }
 }
