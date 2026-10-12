@@ -5,6 +5,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ["**/dist/**", "**/node_modules/**"],
+    // prototypes/ hold standalone experiments with their own tooling.
+    ignores: ["**/dist/**", "**/node_modules/**", "prototypes/**"],
   }
 );
